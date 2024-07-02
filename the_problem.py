@@ -1,5 +1,6 @@
 import time
 from collections import deque
+import heapq # Priority queues from the box
 
 # ASYNCIO LIBRARIES DO TIME MANAGEMENT IN SCHEDULERS
 
@@ -7,20 +8,22 @@ class Scheduler:
     def __init__(self):
         self.ready = deque()
         self.sleeping = []
+        self.sequence = 0
 
     def call_soon(self, func):
         self.ready.append(func)
 
     def call_later(self, delay, func):
+        self.sequence += 1
         deadline = time.time() + delay # Expiration time
-        self.sleeping.append((deadline, func))
-        self.sleeping.sort() # Sort by closest deadline
+        # Priority queue
+        heapq.heappush(self.sleeping, (deadline, self.sequence, func))
 
 
     def run(self):
         while self.ready or self.sleeping:
             if not self.ready:
-                deadline, func = self.sleeping.pop(0)
+                deadline, _, func = heapq.heappop(self.sleeping)
                 delta = deadline - time.time()
                 if delta > 0:
                     time.sleep(delta)
