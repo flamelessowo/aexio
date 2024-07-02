@@ -25,7 +25,6 @@ class Scheduler:
                 if delta > 0:
                     time.sleep(delta)
                 self.ready.append(func)
-                # Find the nearest deadline
 
             while self.ready:
                 func = self.ready.popleft()
@@ -47,8 +46,8 @@ def countup(n):
     _run(0)
     
 
-sched.call_soon(lambda: countup(5))
-sched.call_soon(lambda: countdown(20))
+sched.call_soon(lambda: countup(20))
+sched.call_soon(lambda: countdown(5))
 sched.run()
 
 # Problem: how to achive concurrency without threads?
