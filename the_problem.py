@@ -1,34 +1,54 @@
 import time
 from collections import deque
 
+# ASYNCIO LIBRARIES DO TIME MANAGEMENT IN SCHEDULERS
+
 class Scheduler:
     def __init__(self):
-        self.ready= deque()
+        self.ready = deque()
+        self.sleeping = []
 
     def call_soon(self, func):
         self.ready.append(func)
 
+    def call_later(self, delay, func):
+        deadline = time.time() + delay # Expiration time
+        self.sleeping.append((deadline, func))
+        self.sleeping.sort() # Sort by closest deadline
+
+
     def run(self):
-        while self.ready:
-            func = self.ready.popleft()
-            func()
+        while self.ready or self.sleeping:
+            if not self.ready:
+                deadline, func = self.sleeping.pop(0)
+                delta = deadline - time.time()
+                if delta > 0:
+                    time.sleep(delta)
+                self.ready.append(func)
+                # Find the nearest deadline
+
+            while self.ready:
+                func = self.ready.popleft()
+                func()
+
 
 sched = Scheduler()
 
 def countdown(n):
     if n > 0:
         print('Down', n)
-        time.sleep(1)
-        sched.call_soon(lambda: countdown(n-1))
+        sched.call_later(4, lambda: countdown(n-1))
 
-def countup(n, x=0):
-    if x < n:
-        print('Up', x)
-        time.sleep(1)
-        sched.call_soon(lambda: countup(n, x+1))
+def countup(n):
+    def _run(x):
+        if x < n:
+            print('Up', x)
+            sched.call_later(1, lambda: _run(x+1))
+    _run(0)
+    
 
 sched.call_soon(lambda: countup(5))
-sched.call_soon(lambda: countdown(5))
+sched.call_soon(lambda: countdown(20))
 sched.run()
 
 # Problem: how to achive concurrency without threads?
