@@ -48,10 +48,10 @@ def countup(n):
             sched.call_later(1, lambda: _run(x+1))
     _run(0)
     
-
-sched.call_soon(lambda: countup(20))
-sched.call_soon(lambda: countdown(5))
-sched.run()
+if __name__ == '__main__':
+    sched.call_soon(lambda: countup(20))
+    sched.call_soon(lambda: countdown(5))
+    sched.run()
 
 # Problem: how to achive concurrency without threads?
 # Issue: Figure out how to switch between tasks
